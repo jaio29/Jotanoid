@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jotanoid | Arkanoid Retro Neon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game-container" class="game-container">
+    <!-- Top HUD Overlay -->
+    <header id="hud" class="hud-overlay hidden">
+      <div class="hud-item score-container">
+        <span class="hud-label">SCORE</span>
+        <span id="score-val" class="hud-value font-neon">000,000</span>
+      </div>
+      <div class="hud-item level-container">
+        <span class="hud-label">LEVEL</span>
+        <span id="level-val" class="hud-value font-neon">1</span>
+      </div>
+      <div class="hud-item multiplier-container">
+        <span class="hud-label">COMBO</span>
+        <span id="combo-val" class="hud-value font-neon">x1</span>
+      </div>
+      <div class="hud-item lives-container">
+        <span class="hud-label">LIVES</span>
+        <div id="lives-icons" class="lives-icons">
+          <!-- Hearts generated dynamically or defined via SVG -->
+          <svg class="heart-icon active" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="heart-icon active" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="heart-icon active" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Game Canvas -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <!-- UI Overlay Panels -->
+    
+    <!-- 0. Name Input Overlay -->
+    <section id="menu-name-input" class="overlay-panel hidden">
+      <div class="glass-card text-center border-blue">
+        <button id="btn-close-name" class="btn-close" type="button">&times;</button>
+        <h1 class="game-title">JOTA<span class="highlight">NOID</span></h1>
+        <p class="game-subtitle">IDENTIFIQUE-SE, PILOTO</p>
+        
+        <div class="name-input-container">
+          <input type="text" id="player-name-input" class="text-input" placeholder="Digite seu nome..." maxlength="12" autofocus>
+        </div>
+
+        <button id="btn-submit-name" class="btn btn-primary btn-glow" type="button">ENTRAR</button>
+      </div>
+    </section>
+
+    <!-- 1. Start Menu Overlay -->
+    <section id="menu-start" class="overlay-panel">
+      <div class="glass-card text-center">
+        <h1 class="game-title">JOTA<span class="highlight">NOID</span></h1>
+        <p class="game-subtitle">RETRO SYNTHWAVE ARKANOID</p>
+        
+        <div class="controls-guide">
+          <p class="section-title">CONTROLES</p>
+          <div class="controls-icons" style="justify-content: center;">
+            <div class="control-item" style="max-width: 240px;">
+              <span class="kbd">MOUSE</span>
+              <p>Mova o mouse horizontalmente para controlar a barra</p>
+            </div>
+          </div>
+          <div class="control-item mt-2">
+            <span class="kbd">CLIQUE DO MOUSE</span>
+            <p>Clique para lançar a bolinha e disparar projéteis</p>
+          </div>
+        </div>
+
+        <button id="btn-start" class="btn btn-primary btn-glow" type="button">INICIAR JOGO</button>
+        <button id="btn-view-leaderboard" class="btn btn-secondary w-100 mt-2" type="button">VER RANKING</button>
+      </div>
+    </section>
+
+    <!-- 2. Game Over Overlay -->
+    <section id="menu-gameover" class="overlay-panel hidden">
+      <div class="glass-card text-center alert-card border-red">
+        <h2 class="menu-title text-red neon-glow-red">GAME OVER</h2>
+        <p class="menu-subtitle">A gravidade venceu desta vez.</p>
+        
+        <div class="stats-box">
+          <div class="stat-row">
+            <span>Pontuação Final:</span>
+            <span id="go-score" class="font-neon text-cyan">000,000</span>
+          </div>
+          <div class="stat-row">
+            <span>Blocos Destruídos:</span>
+            <span id="go-bricks" class="font-neon text-yellow">0 / 0</span>
+          </div>
+        </div>
+
+        <button id="btn-gameover-restart" class="btn btn-primary btn-red btn-glow-red" type="button">TENTAR NOVAMENTE</button>
+      </div>
+    </section>
+
+    <!-- 3. Victory Overlay -->
+    <section id="menu-victory" class="overlay-panel hidden">
+      <div class="glass-card text-center alert-card border-green">
+        <h2 class="menu-title text-green neon-glow-green">VITÓRIA!</h2>
+        <p class="menu-subtitle">Você limpou a grade de blocos com sucesso.</p>
+
+        <div class="stats-box">
+          <div class="stat-row">
+            <span>Pontuação Final:</span>
+            <span id="vic-score" class="font-neon text-cyan">000,000</span>
+          </div>
+          <div class="stat-row">
+            <span>Vidas Restantes:</span>
+            <span id="vic-lives" class="font-neon text-pink">0</span>
+          </div>
+        </div>
+
+        <button id="btn-victory-restart" class="btn btn-primary btn-green btn-glow-green" type="button">JOGAR DE NOVO</button>
+      </div>
+    </section>
+
+    <!-- 4. Pause Overlay -->
+    <section id="menu-pause" class="overlay-panel hidden">
+      <div class="glass-card text-center alert-card border-blue">
+        <h2 class="menu-title text-cyan neon-glow-cyan">PAUSADO</h2>
+        <p class="menu-subtitle">Partida suspensa temporariamente.</p>
+
+        <button id="btn-pause-resume" class="btn btn-primary btn-glow" type="button">CONTINUAR JOGO</button>
+        <button id="btn-pause-menu" class="btn btn-secondary w-100 mt-3" type="button">VOLTAR AO MENU INICIAL</button>
+      </div>
+    </section>
+
+    <!-- 5. Leaderboard Overlay -->
+    <section id="menu-leaderboard" class="overlay-panel hidden">
+      <div class="glass-card text-center alert-card border-blue" style="width: 440px;">
+        <h2 class="menu-title text-cyan neon-glow-cyan">RANKING</h2>
+        <p class="menu-subtitle">Os 5 melhores defensores da galáxia</p>
+
+        <div class="stats-box" style="margin-bottom: 24px; padding: 12px 16px;">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th style="width: 20%; text-align: center;">POS</th>
+                <th style="width: 50%; text-align: left;">PILOTO</th>
+                <th style="width: 30%; text-align: right;">PONTOS</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <!-- Registros gerados dinamicamente via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <button id="btn-leaderboard-back" class="btn btn-primary btn-glow" type="button">VOLTAR</button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer-info">
+    <p>Use <kbd class="kbd-sm">P</kbd> ou <kbd class="kbd-sm">ESC</kbd> para pausar o jogo.</p>
+  </footer>
+
+  <script src="game.js"></script>
+</body>
+</html>
