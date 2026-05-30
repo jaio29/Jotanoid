@@ -285,6 +285,10 @@ const game = {
     this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     this.canvas.addEventListener('click', () => this.handleCanvasClick());
     
+    // Touch Event Listeners for Mobile controls
+    this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+    this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+    
     // UI Event Listeners
     this.btnStart.addEventListener('click', () => this.promptPlayerName());
     this.btnGameOverRestart.addEventListener('click', () => this.restartGame());
@@ -584,6 +588,59 @@ const game = {
     const mouseX = (e.clientX - rect.left) * scaleX;
     
     this.paddle.x = mouseX - this.paddle.width / 2;
+    
+    if (this.paddle.x < 0) {
+      this.paddle.x = 0;
+    } else if (this.paddle.x > this.canvas.width - this.paddle.width) {
+      this.paddle.x = this.canvas.width - this.paddle.width;
+    }
+    
+    // Move any attached balls horizontally with the paddle
+    this.balls.forEach(b => {
+      if (b.attached) {
+        b.x = this.paddle.x + this.paddle.width / 2;
+      }
+    });
+  },
+
+  handleTouchStart(e) {
+    if (this.state !== 'PLAYING') return;
+    if (e.touches.length === 0) return;
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+    
+    // Tap triggers ball launch or laser firing
+    const hasAttached = this.balls.some(b => b.attached);
+    if (hasAttached) {
+      this.launchBall();
+    } else if (this.paddle.laserTimer > 0 && this.paddle.laserCooldown <= 0) {
+      this.fireLasers();
+    }
+    
+    this.movePaddleToX(touchX);
+    
+    e.preventDefault();
+    e.stopPropagation();
+  },
+
+  handleTouchMove(e) {
+    if (this.state !== 'PLAYING') return;
+    if (e.touches.length === 0) return;
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const scaleX = this.canvas.width / rect.width;
+    const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+    
+    this.movePaddleToX(touchX);
+    
+    e.preventDefault();
+    e.stopPropagation();
+  },
+
+  movePaddleToX(touchX) {
+    this.paddle.x = touchX - this.paddle.width / 2;
     
     if (this.paddle.x < 0) {
       this.paddle.x = 0;
